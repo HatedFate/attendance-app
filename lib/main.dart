@@ -27,25 +27,23 @@ class MyAppPage extends StatefulWidget {
 
 class _MyAppPageState extends State<MyAppPage> {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text("Attendance App")),
-        body: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ButtonWidget(
-                text: "Check In",
-                onClicked: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        const AttendanceScreen(checkIn: true)))),
-            const SizedBox(height: 72),
-            ButtonWidget(
-                text: "Check Out",
-                onClicked: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        const AttendanceScreen(checkIn: false))))
-          ],
-        )));
-  }
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: const Text("Attendance App")),
+      body: Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ButtonWidget(
+              text: "Check In",
+              onClicked: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      const AttendanceScreen(checkIn: true)))),
+          const SizedBox(height: 72),
+          ButtonWidget(
+              text: "Check Out",
+              onClicked: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      const AttendanceScreen(checkIn: false))))
+        ],
+      )));
 }
