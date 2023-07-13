@@ -70,7 +70,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                       contentPadding: EdgeInsets.symmetric(
                                           vertical: screenHeight / 35)),
                                   onFieldSubmitted: (value) {
-                                    search(value, widget.checkIn);
+                                    query(value, widget.checkIn);
                                     clearText();
                                   },
                                   controller: fieldText,

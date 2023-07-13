@@ -1,6 +1,7 @@
 import 'package:attendance/attendance_screen.dart';
 import 'package:attendance/button_widget.dart';
 import 'package:flutter/material.dart';
+import 'attendance.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,22 +29,27 @@ class MyAppPage extends StatefulWidget {
 class _MyAppPageState extends State<MyAppPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text("Attendance App")),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ButtonWidget(
-              text: "Check In",
-              onClicked: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      const AttendanceScreen(checkIn: true)))),
-          const SizedBox(height: 72),
-          ButtonWidget(
-              text: "Check Out",
-              onClicked: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      const AttendanceScreen(checkIn: false))))
-        ],
-      )));
+        appBar: AppBar(title: const Text("Attendance App")),
+        body: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ButtonWidget(
+                text: "Check In",
+                onClicked: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const AttendanceScreen(checkIn: true)))),
+            const SizedBox(height: 72),
+            ButtonWidget(
+                text: "Check Out",
+                onClicked: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const AttendanceScreen(checkIn: false))))
+          ],
+        )),
+        floatingActionButton: const FloatingActionButton(
+            onPressed: downloadRecord,
+            tooltip: "Download Record",
+            child: Icon(Icons.download)),
+      );
 }

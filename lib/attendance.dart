@@ -1,9 +1,9 @@
+import "dart:io";
 import "package:excel/excel.dart";
 import "package:intl/intl.dart";
-import "dart:io";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
-Future search(String code, bool checkIn) async {
+Future query(String code, bool checkIn) async {
   String file =
       "path\\assets\\test.xlsx";
   String databasePath =
@@ -13,7 +13,7 @@ Future search(String code, bool checkIn) async {
   Database db = await openDatabase(databasePath, version: 1,
       onCreate: (Database db, int version) async {
     await db.execute(
-        "CREATE TABLE TEST (id INTEGER PRIMARY KEY, QR_CODE TEXT, "
+        "CREATE IF NOT EXISTS TABLE TEST (id INTEGER PRIMARY KEY, QR_CODE TEXT, "
         "FIRST_NAME TEXT NOT NULL, LAST_NAME TEXT NOT NULL, "
         "DATE TEXT, CHECK_IN TEXT, CHECK_OUT TEXT)");
   });
@@ -30,6 +30,8 @@ Future search(String code, bool checkIn) async {
       }
     }
   }
+  deleteDuplicates(db);
+  test(db);
 }
 
 void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
@@ -51,4 +53,18 @@ void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
       [time, code, date]
     );
   }
+}
+
+void deleteDuplicates(Database db) async {
+  await db.rawDelete("DELETE FROM TEST WHERE rowid NOT IN "
+      "(SELECT MIN(rowid) FROM TEST GROUP BY QR_CODE, DATE)");
+}
+
+void downloadRecord(){
+
+}
+
+void test(Database db) async {
+  List<Map> list  = await db.rawQuery("SELECT * FROM TEST");
+  print(list);
 }
