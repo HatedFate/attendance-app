@@ -1,13 +1,24 @@
 import "package:excel/excel.dart";
 import "package:intl/intl.dart";
-import "package:flutter/services.dart" show ByteData, rootBundle;
+import "dart:io";
+import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
-void search(String code, bool checkIn) async {
-  var file = "../assets/test.xlsx";
+Future search(String code, bool checkIn) async {
+  String file =
+      "path\\assets\\test.xlsx";
+  String databasePath =
+      "path\\assets\\test.db";
 
-  ByteData data = await rootBundle.load(file);
-  dynamic bytes =
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  databaseFactory = databaseFactoryFfi;
+  Database db = await openDatabase(databasePath, version: 1,
+      onCreate: (Database db, int version) async {
+    await db.execute(
+        "CREATE TABLE TEST (id INTEGER PRIMARY KEY, QR_CODE TEXT, "
+        "FIRST_NAME TEXT NOT NULL, LAST_NAME TEXT NOT NULL, "
+        "DATE TEXT, CHECK_IN TEXT, CHECK_OUT TEXT)");
+  });
+
+  var bytes = File(file).readAsBytesSync();
   Excel excel = Excel.decodeBytes(bytes);
   Sheet sheet1 = excel["Sheet1"];
 
@@ -15,15 +26,13 @@ void search(String code, bool checkIn) async {
     if (sheet1.row(row).elementAt(0) != null) {
       List<Data?> authCode = sheet1.row(row);
       if (authCode.elementAt(0)!.value.toString() == code) {
-        add(authCode, excel, checkIn);
+        add(authCode, excel, checkIn, db);
       }
     }
   }
 }
 
-void add(List<Data?> item, Excel excel, bool checkIn) async {
-  var sheet2 = excel["Sheet2"];
-
+void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
   String code = item.elementAt(0)!.value.toString();
   String fName = item.elementAt(1)!.value.toString();
   String lName = item.elementAt(2)!.value.toString();
@@ -31,16 +40,15 @@ void add(List<Data?> item, Excel excel, bool checkIn) async {
   String time = DateFormat("HH:mm").format(DateTime.now());
 
   if (checkIn) {
-    List<String?> itemList = <String?>[code, fName, lName, date, time, null];
-    sheet2.appendRow(itemList);
+    await db.transaction((txn) async {
+      await txn.rawInsert(
+          "INSERT INTO TEST(QR_CODE, FIRST_NAME, LAST_NAME, DATE, CHECK_IN, CHECK_OUT) "
+              "VALUES(?, ?, ?, ?, ?, ?)", [code, fName, lName, date, time, null]);
+    });
   } else {
-    for (int row = sheet2.maxRows - 1; row > 0; row--) {
-      List<Data?> data = sheet2.row(row);
-      if (data.elementAt(3)!.value.toString() != date) return;
-      if (data.elementAt(0)!.value.toString() == code) {
-        Data cell = sheet2.cell(CellIndex.indexByString("D$row"));
-        cell.value = time;
-      }
-    }
+    await db.rawUpdate(
+      "UPDATE TEST SET CHECK_OUT = ? WHERE QR_CODE = ? AND DATE = ?",
+      [time, code, date]
+    );
   }
 }
