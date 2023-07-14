@@ -11,8 +11,8 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
-  final fieldText = TextEditingController();
-  late FocusNode focusNode;
+  late final TextEditingController fieldText;
+  late final FocusNode focusNode;
 
   void clearText() {
     fieldText.clear();
@@ -22,11 +22,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   void initState(){
     super.initState();
+    fieldText = TextEditingController();
     focusNode = FocusNode();
   }
 
   @override
   void dispose(){
+    fieldText.dispose();
     focusNode.dispose();
     super.dispose();
   }
