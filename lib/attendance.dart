@@ -4,9 +4,10 @@ import "package:excel/excel.dart";
 import "package:intl/intl.dart";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
-String file = "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.xlsx";
-String databasePath =
-    "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.db";
+Directory current = Directory.current;
+
+String file = "${current.path}\\assets\\test.xlsx";
+String databasePath = "${current.path}\\assets\\test.db";
 
 Future query(String code, bool checkIn) async {
   databaseFactory = databaseFactoryFfi;
@@ -86,7 +87,7 @@ void downloadRecord() async {
   }
 
   String outputFile =
-      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\Record.xlsx";
+      "${current.path}\\assets\\Record.xlsx";
   List<int>? fileBytes = excel.save(fileName: "Record");
   if (fileBytes != null) {
     File(join(outputFile))
