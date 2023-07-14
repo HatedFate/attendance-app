@@ -22,8 +22,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   void initState(){
     super.initState();
-
     focusNode = FocusNode();
+  }
+
+  @override
+  void dispose(){
+    focusNode.dispose();
+    super.dispose();
   }
 
   @override
