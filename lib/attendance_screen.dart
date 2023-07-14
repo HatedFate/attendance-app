@@ -12,9 +12,18 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final fieldText = TextEditingController();
+  late FocusNode focusNode;
 
   void clearText() {
     fieldText.clear();
+    focusNode.requestFocus();
+  }
+
+  @override
+  void initState(){
+    super.initState();
+
+    focusNode = FocusNode();
   }
 
   @override
@@ -75,7 +84,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                   },
                                   controller: fieldText,
                                   textInputAction: TextInputAction.done,
-                                  autofocus: true))
+                                  focusNode: focusNode,
+                                  autofocus: true)
+                          )
                         ],
                       ),
                     ),
