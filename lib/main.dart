@@ -1,7 +1,7 @@
-import 'package:attendance/attendance_screen.dart';
-import 'package:attendance/button_widget.dart';
-import 'package:flutter/material.dart';
-import 'attendance.dart';
+import "package:attendance/attendance_screen.dart";
+import "package:attendance/button_widget.dart";
+import "package:flutter/material.dart";
+import "attendance.dart";
 
 void main() {
   runApp(const MyApp());

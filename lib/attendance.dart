@@ -1,14 +1,14 @@
 import "dart:io";
+import "package:path/path.dart";
 import "package:excel/excel.dart";
 import "package:intl/intl.dart";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
-Future query(String code, bool checkIn) async {
-  String file =
-      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.xlsx";
-  String databasePath =
-      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\assets\\test.db";
+String file = "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.xlsx";
+String databasePath =
+    "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.db";
 
+Future query(String code, bool checkIn) async {
   databaseFactory = databaseFactoryFfi;
   Database db = await openDatabase(databasePath, version: 1,
       onCreate: (Database db, int version) async {
@@ -31,7 +31,6 @@ Future query(String code, bool checkIn) async {
     }
   }
   deleteDuplicates(db);
-  test(db);
 }
 
 void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
@@ -45,13 +44,13 @@ void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
     await db.transaction((txn) async {
       await txn.rawInsert(
           "INSERT INTO TEST(QR_CODE, FIRST_NAME, LAST_NAME, DATE, CHECK_IN, CHECK_OUT) "
-              "VALUES(?, ?, ?, ?, ?, ?)", [code, fName, lName, date, time, null]);
+          "VALUES(?, ?, ?, ?, ?, ?)",
+          [code, fName, lName, date, time, null]);
     });
   } else {
     await db.rawUpdate(
-      "UPDATE TEST SET CHECK_OUT = ? WHERE QR_CODE = ? AND DATE = ?",
-      [time, code, date]
-    );
+        "UPDATE TEST SET CHECK_OUT = ? WHERE QR_CODE = ? AND DATE = ?",
+        [time, code, date]);
   }
 }
 
@@ -60,11 +59,38 @@ void deleteDuplicates(Database db) async {
       "(SELECT MIN(rowid) FROM TEST GROUP BY QR_CODE, DATE)");
 }
 
-void downloadRecord(){
+void downloadRecord() async {
+  databaseFactory = databaseFactoryFfi;
+  Database db = await openDatabase(databasePath, version: 1);
 
-}
+  Excel excel = Excel.createExcel();
+  List<String?> header = <String?>[
+    "ID",
+    "Code",
+    "First Name",
+    "Last Name",
+    "Date",
+    "Check In",
+    "Check Out"
+  ];
 
-void test(Database db) async {
-  List<Map> list  = await db.rawQuery("SELECT * FROM TEST");
-  print(list);
+  excel.appendRow("Sheet1", header);
+
+  List<Map> list = await db.rawQuery("SELECT * FROM TEST");
+  if (list.isEmpty) return;
+
+  for (Map item in list) {
+    List<String?> recordData =
+        item.entries.map((e) => e.value.toString()).toList();
+    excel.appendRow("Sheet1", recordData);
+  }
+
+  String outputFile =
+      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\Record.xlsx";
+  List<int>? fileBytes = excel.save(fileName: "Record");
+  if (fileBytes != null) {
+    File(join(outputFile))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(fileBytes);
+  }
 }

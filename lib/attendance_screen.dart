@@ -74,7 +74,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                     clearText();
                                   },
                                   controller: fieldText,
-                                  textInputAction: TextInputAction.done))
+                                  textInputAction: TextInputAction.done,
+                                  autofocus: true))
                         ],
                       ),
                     ),
