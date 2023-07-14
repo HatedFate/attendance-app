@@ -5,15 +5,15 @@ import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
 Future query(String code, bool checkIn) async {
   String file =
-      "path\\assets\\test.xlsx";
+      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\test.xlsx";
   String databasePath =
-      "path\\assets\\test.db";
+      "C:\\Users\\xinqi\\StudioProjects\\attendance\\assets\\assets\\test.db";
 
   databaseFactory = databaseFactoryFfi;
   Database db = await openDatabase(databasePath, version: 1,
       onCreate: (Database db, int version) async {
     await db.execute(
-        "CREATE IF NOT EXISTS TABLE TEST (id INTEGER PRIMARY KEY, QR_CODE TEXT, "
+        "CREATE TABLE IF NOT EXISTS TEST (id INTEGER PRIMARY KEY, QR_CODE TEXT, "
         "FIRST_NAME TEXT NOT NULL, LAST_NAME TEXT NOT NULL, "
         "DATE TEXT, CHECK_IN TEXT, CHECK_OUT TEXT)");
   });
