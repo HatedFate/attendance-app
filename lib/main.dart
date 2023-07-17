@@ -1,5 +1,6 @@
 import "package:attendance/attendance_screen.dart";
 import "package:attendance/button_widget.dart";
+import "package:quickalert/quickalert.dart";
 import "package:flutter/material.dart";
 import "attendance.dart";
 
@@ -47,9 +48,15 @@ class _MyAppPageState extends State<MyAppPage> {
                         const AttendanceScreen(checkIn: false))))
           ],
         )),
-        floatingActionButton: const FloatingActionButton(
-            onPressed: downloadRecord,
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              downloadRecord();
+              QuickAlert.show(
+                  context: context,
+                  type: QuickAlertType.success,
+                  text: "Successfully Downloaded!");
+            },
             tooltip: "Download Record",
-            child: Icon(Icons.download)),
+            child: const Icon(Icons.download)),
       );
 }
