@@ -11,6 +11,9 @@ Directory current = Directory.current;
 String file = "${current.path}\\assets\\test.xlsx";
 String databasePath = "${current.path}\\assets\\test.db";
 
+String date = DateFormat("yyyy-MM-dd").format(DateTime.now());
+String time = DateFormat("HH:mm").format(DateTime.now());
+
 Future query(BuildContext context, String code, bool checkIn) async {
   databaseFactory = databaseFactoryFfi;
   Database db = await openDatabase(databasePath, version: 1,
@@ -29,38 +32,25 @@ Future query(BuildContext context, String code, bool checkIn) async {
   for (int row = 1; row < sheet1.maxRows; row++) {
     if (sheet1.row(row).elementAt(0) != null) {
       List<Data?> authCode = sheet1.row(row);
-      if (authCode.elementAt(0)!.value.toString() == code) {
-        add(authCode, excel, checkIn, db);
-        cnt = await deleteDuplicates(db);
+      if (context.mounted && authCode.elementAt(0)!.value.toString() == code) {
+        add(context, authCode, excel, checkIn, db);
+        cnt = await deleteDuplicates(db, code);
         if (context.mounted && cnt > 0) {
-          QuickAlert.show(
-              context: context,
-              type: QuickAlertType.warning,
-              title: "Warning",
-              text: checkIn
-                  ? "User had already checked in!"
-                  : "User had already checked out!");
+          warning(context, "User had already checked in!");
         }
         return;
       }
     }
   }
 
-  if (context.mounted) {
-    QuickAlert.show(
-        context: context,
-        type: QuickAlertType.warning,
-        title: "Warning",
-        text: "User cannot be found!");
-  }
+  if (context.mounted) warning(context, "User cannot be found!");
 }
 
-void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
+void add(BuildContext context, List<Data?> item, Excel excel, bool checkIn,
+    Database db) async {
   String code = item.elementAt(0)!.value.toString();
   String fName = item.elementAt(1)!.value.toString();
   String lName = item.elementAt(2)!.value.toString();
-  String date = DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String time = DateFormat("HH:mm").format(DateTime.now());
 
   if (checkIn) {
     await db.transaction((txn) async {
@@ -70,17 +60,27 @@ void add(List<Data?> item, Excel excel, bool checkIn, Database db) async {
           [code, fName, lName, date, time, null]);
     });
   } else {
-    await db.rawUpdate(
+    List<Map> checkOutToday = await db.rawQuery(
+        "SELECT * FROM TEST WHERE QR_CODE = ? AND DATE = ?", [code, date]);
+
+    if (checkOutToday.isNotEmpty) {
+      bool checkOutDuplicates = checkOutToday.last.containsValue(null);
+
+      if (context.mounted && !checkOutDuplicates) {
+        warning(context, "User had already checked out!");
+
+        return;
+      }
+    }
+
+    int cnt = await db.rawUpdate(
         "UPDATE TEST SET CHECK_OUT = ? WHERE QR_CODE = ? AND DATE = ?",
         [time, code, date]);
+
+    if (cnt == 0 && context.mounted) {
+      warning(context, "User did not checked in yet!");
+    }
   }
-}
-
-Future<int> deleteDuplicates(Database db) async {
-  int cnt = await db.rawDelete("DELETE FROM TEST WHERE rowid NOT IN "
-      "(SELECT MIN(rowid) FROM TEST GROUP BY QR_CODE, DATE)");
-
-  return cnt;
 }
 
 void downloadRecord() async {
@@ -116,4 +116,21 @@ void downloadRecord() async {
       ..createSync(recursive: true)
       ..writeAsBytesSync(fileBytes);
   }
+}
+
+void warning(BuildContext context, String text) {
+  if (context.mounted) {
+    QuickAlert.show(
+        context: context,
+        type: QuickAlertType.warning,
+        title: "Warning",
+        text: text);
+  }
+}
+
+Future<int> deleteDuplicates(Database db, String code) async {
+  int cnt1 = await db.rawDelete("DELETE FROM TEST WHERE rowid NOT IN "
+      "(SELECT MIN(rowid) FROM TEST GROUP BY QR_CODE, DATE)");
+
+  return cnt1;
 }
